@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora Pro de Juros Compostos & Renda Passiva</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar & Range Sliders */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.1);
+    }
+    .dark ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(16, 185, 129, 0.7);
+    }
+
+    /* Custom Range Input */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #10b981;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.45);
+      margin-top: -6px;
+      transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #059669;
+    }
+
+    .glass-card {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300 min-h-screen">
+
+  <!-- Background Subtle Glow Effects -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+    <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/10 dark:bg-emerald-500/10 blur-3xl"></div>
+    <div class="absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-blue-500/10 dark:bg-blue-500/10 blur-3xl"></div>
+    <div class="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-teal-500/5 dark:bg-teal-500/10 blur-3xl"></div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900 dark:bg-emerald-600 text-white shadow-xl border border-slate-700 dark:border-emerald-400/30">
+    <svg class="w-5 h-5 text-emerald-400 dark:text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span id="toastMessage" class="text-sm font-medium">Ação realizada com sucesso!</span>
+  </div>
+
+  <!-- Top Header / Navbar -->
+  <header class="sticky top-0 z-30 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 glass-card">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <div class="flex flex-col text-base sm:text-lg leading-none">
+              <h1 class="font-bold tracking-tight leading-none bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-600 dark:from-white dark:via-slate-100 dark:to-emerald-400 bg-clip-text text-transparent">
+                JurosPro
+              </h1>
+              <span style="font-size: 0.55em;" class="font-medium tracking-wide text-slate-500 dark:text-emerald-400/80 leading-tight mt-0.5">
+                by bambulando.com
+              </span>
+            </div>
+            <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              Renda Passiva & Patrimônio
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block mt-0.5">
+            Simulador de alta precisão com equivalência composta e equação de Fisher
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Reset Button -->
+        <button id="btnReset" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-colors" title="Restaurar valores padrão">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span class="hidden sm:inline">Restaurar</span>
+        </button>
+
+        <!-- Copy Summary Button -->
+        <button id="btnCopyHeader" type="button" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm shadow-emerald-500/20 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+          </svg>
+          <span>Copiar Resumo</span>
+        </button>
+
+        <!-- Theme Toggle Button -->
+        <button id="btnTheme" type="button" aria-label="Alternar tema Claro/Escuro" class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/80 transition-colors">
+          <!-- Sun Icon (shown in dark mode) -->
+          <svg id="iconSun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+          <!-- Moon Icon (shown in light mode) -->
+          <svg id="iconMoon" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+      <!-- LEFT COLUMN: PARAMETERS PANEL (4 Cols on Desktop) -->
+      <section class="lg:col-span-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-xl shadow-slate-900/5 dark:shadow-black/30 space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-6 rounded-full bg-emerald-500"></span>
+            <h2 class="text-base font-bold text-slate-900 dark:text-white">Parâmetros da Simulação</h2>
+          </div>
+          <span class="text-[11px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+            Tempo Real
+          </span>
+        </div>
+
+        <!-- 1. Valor Inicial -->
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <label for="inputInitial" class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Valor Inicial
+            </label>
+            <button type="button" data-action="clear-initial" class="text-[11px] text-slate-400 hover:text-rose-500 transition-colors">
+              Zerar
+            </button>
+          </div>
+
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 pointer-events-none">
+              R$
+            </span>
+            <input
+              id="inputInitial"
+              type="text"
+              inputmode="numeric"
+              value="10.000,00"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 dark:focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-mono text-sm sm:text-base font-semibold text-slate-900 dark:text-white transition-all"
+            />
+          </div>
+
+          <!-- Quick Add Buttons for Initial Value -->
+          <div class="grid grid-cols-3 gap-2 pt-0.5">
+            <button type="button" data-add-initial="1000" class="py-1.5 px-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-emerald-500/10 text-slate-700 hover:text-emerald-600 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400 border border-transparent hover:border-emerald-500/30 transition-all">
+              +R$ 1k
+            </button>
+            <button type="button" data-add-initial="5000" class="py-1.5 px-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-emerald-500/10 text-slate-700 hover:text-emerald-600 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400 border border-transparent hover:border-emerald-500/30 transition-all">
+              +R$ 5k
+            </button>
+            <button type="button" data-add-initial="10000" class="py-1.5 px-2 rounded-lg text-xs font-medium bg-slate-100 hover:bg-emerald-500/10 text-slate-700 hover:text-emerald-600 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-emerald-500/20 dark:hover:text-emerald-400 border border-transparent hover:border-emerald-500/30 transition-all">
+              +R$ 10k
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Aporte Mensal + Reajuste Anual -->
+        <div class="space-y-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div class="flex items-center justify-between">
+            <label for="inputMonthly" class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Aporte Mensal
+            </label>
+            <div class="flex items-center gap-2">
+              <button type="button" data-add-monthly="250" class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline">+R$ 250</button>
+              <span class="text-slate-300 dark:text-slate-700">|</span>
+              <button type="button" data-add-monthly="1000" class="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 hover:underline">+R$ 1k</button>
+            </div>
+          </div>
+
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 pointer-events-none">
+              R$
+            </span>
+            <input
+              id="inputMonthly"
+              type="text"
+              inputmode="numeric"
+              value="1.500,00"
+              class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 dark:focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-mono text-sm sm:text-base font-semibold text-slate-900 dark:text-white transition-all"
+            />
+          </div>
+
+          <input
+            id="sliderMonthly"
+            type="range"
+            min="0"
+            max="25000"
+            step="100"
+            value="1500"
+            class="w-full bg-slate-200 dark:bg-slate-800 rounded-lg"
+          />
+
+          <!-- Reajuste Anual do Aporte -->
+          <div class="mt-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-950/70 border border-slate-200/70 dark:border-slate-800/80">
+            <div class="flex items-center justify-between gap-2">
+              <div>
+                <label for="inputStepUp" class="text-xs font-medium text-slate-700 dark:text-slate-300 block">
+                  Reajuste anual do aporte
+                </label>
+                <span class="text-[11px] text-slate-500 dark:text-slate-400">
+                  Aumenta seu aporte a cada 12 meses
+                </span>
+              </div>
+              <div class="relative w-24 shrink-0">
+                <input
+                  id="inputStepUp"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.5"
+                  value="0"
+                  class="w-full pl-3 pr-7 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-emerald-500 outline-none font-mono text-xs font-semibold text-right text-slate-900 dark:text-white"
+                />
+                <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-xs text-slate-400 pointer-events-none">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Taxa de Juros + Presets -->
+        <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div class="flex items-center justify-between">
+            <label for="inputRate" class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Taxa de Rentabilidade
+            </label>
+            <span id="equivalentRateBadge" class="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-medium">
+              ≈ 0,9489% a.m.
+            </span>
+          </div>
+
+          <div class="flex gap-2">
+            <div class="relative flex-1">
+              <input
+                id="inputRate"
+                type="number"
+                min="0"
+                max="200"
+                step="0.1"
+                value="12.0"
+                class="w-full pl-3.5 pr-9 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-mono text-sm sm:text-base font-semibold text-slate-900 dark:text-white transition-all"
+              />
+              <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 pointer-events-none">
+                %
+              </span>
+            </div>
+
+            <!-- Selector Anual / Mensal -->
+            <div class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                id="btnRateAnnual"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm"
+              >
+                % a.a.
+              </button>
+              <button
+                type="button"
+                id="btnRateMonthly"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              >
+                % a.m.
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets Rápidos -->
+          <div>
+            <span class="text-[11px] text-slate-400 dark:text-slate-500 block mb-1.5">Cenários de Referência (% a.a.):</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-1.5">
+              <button type="button" data-preset-rate="8" class="preset-rate-btn flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-emerald-500/10 dark:bg-slate-800/70 dark:hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 border border-transparent hover:border-emerald-500/30 transition-all">
+                <span>Conservador</span>
+                <span class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">8%</span>
+              </button>
+              <button type="button" data-preset-rate="10" class="preset-rate-btn flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-emerald-500/10 dark:bg-slate-800/70 dark:hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 border border-transparent hover:border-emerald-500/30 transition-all">
+                <span>Moderado</span>
+                <span class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">10%</span>
+              </button>
+              <button type="button" data-preset-rate="12" class="preset-rate-btn flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition-all">
+                <span>CDI / FIIs</span>
+                <span class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">12%</span>
+              </button>
+              <button type="button" data-preset-rate="15" class="preset-rate-btn flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-emerald-500/10 dark:bg-slate-800/70 dark:hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 border border-transparent hover:border-emerald-500/30 transition-all">
+                <span>Arrojado</span>
+                <span class="font-mono font-semibold text-emerald-600 dark:text-emerald-400">15%</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Período de Tempo -->
+        <div class="space-y-3 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div class="flex items-center justify-between">
+            <label for="inputPeriod" class="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Período de Tempo
+            </label>
+            <span id="periodConversionLabel" class="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              240 meses
+            </span>
+          </div>
+
+          <div class="flex gap-2">
+            <input
+              id="inputPeriod"
+              type="number"
+              min="1"
+              max="1200"
+              step="1"
+              value="20"
+              class="flex-1 px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 outline-none font-mono text-sm sm:text-base font-semibold text-slate-900 dark:text-white transition-all"
+            />
+
+            <div class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                id="btnPeriodYears"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm"
+              >
+                Anos
+              </button>
+              <button
+                type="button"
+                id="btnPeriodMonths"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              >
+                Meses
+              </button>
+            </div>
+          </div>
+
+          <input
+            id="sliderPeriod"
+            type="range"
+            min="1"
+            max="50"
+            step="1"
+            value="20"
+            class="w-full bg-slate-200 dark:bg-slate-800 rounded-lg"
+          />
+
+          <div class="flex justify-between text-[11px] font-mono text-slate-400">
+            <span id="sliderMinLabel">1 ano</span>
+            <span id="sliderMidLabel">25 anos</span>
+            <span id="sliderMaxLabel">50 anos</span>
+          </div>
+        </div>
+
+        <!-- 5. Descontar Inflação (Equação de Fisher) -->
+        <div class="pt-2 border-t border-slate-100 dark:border-slate-800/80">
+          <div class="p-3.5 rounded-xl bg-gradient-to-br from-slate-50 to-slate-100/80 dark:from-slate-950 dark:to-slate-900 border border-slate-200/80 dark:border-slate-800 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  Descontar Inflação (IPCA)
+                  <span class="px-1.5 py-0.5 text-[10px] font-mono rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                    Fisher
+                  </span>
+                </span>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Exibe o Poder de Compra Real no futuro
+                </p>
+              </div>
+
+              <!-- Toggle Switch -->
+              <button
+                type="button"
+                id="btnInflationToggle"
+                role="switch"
+                aria-checked="false"
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-slate-300 dark:bg-slate-700 transition-colors duration-200 ease-in-out focus:outline-none"
+              >
+                <span
+                  id="inflationToggleKnob"
+                  class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0"
+                ></span>
+              </button>
+            </div>
+
+            <!-- Inflation Input Container (Collapsible) -->
+            <div id="inflationDetails" class="hidden pt-2 border-t border-slate-200/70 dark:border-slate-800 space-y-2">
+              <div class="flex items-center justify-between gap-2">
+                <label for="inputInflation" class="text-xs font-medium text-slate-600 dark:text-slate-300">
+                  Inflação Estimada (IPCA % a.a.):
+                </label>
+                <div class="relative w-24">
+                  <input
+                    id="inputInflation"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value="4.5"
+                    class="w-full pl-2.5 pr-6 py-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-blue-500 outline-none font-mono text-xs font-semibold text-right text-slate-900 dark:text-white"
+                  />
+                  <span class="absolute inset-y-0 right-0 pr-2 flex items-center text-xs text-slate-400 pointer-events-none">%</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-[11px] px-2.5 py-1.5 rounded-lg bg-blue-500/10 text-blue-700 dark:text-blue-300 border border-blue-500/20">
+                <span>Taxa Real Líquida (Fisher):</span>
+                <span id="realRateDisplay" class="font-mono font-bold">7,18% a.a. (0,58% a.m.)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: RESULTS DASHBOARD, SNOWBALL ALERT, CHART & TABLE (8 Cols on Desktop) -->
+      <section class="lg:col-span-8 space-y-6">
+
+        <!-- 1. HIGHLIGHT KPI CARDS (4 Cards Grid) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <!-- Card 1: Patrimônio Total Acumulado -->
+          <div class="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 shadow-lg shadow-slate-900/5">
+            <div class="absolute -right-6 -top-6 w-24 h-24 rounded-full bg-emerald-500/10 blur-xl pointer-events-none"></div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Patrimônio Total Acumulado
+              </span>
+              <span id="badgeInflationMode" class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                Valor Nominal
+              </span>
+            </div>
+            <div id="kpiTotalWealth" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-900 dark:text-white my-1">
+              R$ 1.595.741,20
+            </div>
+            <div class="mt-3 space-y-1.5">
+              <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex">
+                <div id="barInvested" class="bg-blue-500 h-full transition-all duration-300" style="width: 23%"></div>
+                <div id="barInterest" class="bg-emerald-500 h-full transition-all duration-300" style="width: 77%"></div>
+              </div>
+              <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+                  Capital: <strong id="lblInvestedPct" class="text-slate-700 dark:text-slate-200">23,2%</strong>
+                </span>
+                <span class="flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                  Juros: <strong id="lblInterestPct" class="text-emerald-600 dark:text-emerald-400">76,8%</strong>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Renda Passiva Mensal Estimada -->
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 text-white p-5 shadow-lg shadow-emerald-600/20">
+            <div class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-white/10 blur-xl pointer-events-none"></div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-semibold uppercase tracking-wider text-emerald-100">
+                Renda Passiva Mensal Vitalícia
+              </span>
+              <span class="p-1.5 rounded-lg bg-white/15 text-white">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </span>
+            </div>
+            <div id="kpiPassiveIncome" class="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-white my-1">
+              R$ 15.141,66
+            </div>
+            <p class="text-xs text-emerald-100 mt-2 flex items-center justify-between">
+              <span>Sem consumir o patrimônio principal</span>
+              <span id="kpiPassiveAnnual" class="font-mono font-semibold bg-black/20 px-2 py-0.5 rounded text-[11px]">
+                R$ 181,7k /ano
+              </span>
+            </p>
+          </div>
+
+          <!-- Card 3: Total Investido (Capital Próprio) -->
+          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Total Investido (Desembolso)
+              </span>
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            </div>
+            <div id="kpiTotalInvested" class="text-xl sm:text-2xl font-bold font-mono text-slate-900 dark:text-white">
+              R$ 370.000,00
+            </div>
+            <div id="kpiInvestedBreakdown" class="mt-2 text-xs text-slate-500 dark:text-slate-400 font-mono">
+              Inicial: R$ 10.000,00 + Aportes: R$ 360.000,00
+            </div>
+          </div>
+
+          <!-- Card 4: Total Ganho em Juros Compostos -->
+          <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Ganho em Juros Compostos
+              </span>
+              <span id="badgeMultiplier" class="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                4,31x o capital
+              </span>
+            </div>
+            <div id="kpiTotalInterest" class="text-xl sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+              + R$ 1.225.741,20
+            </div>
+            <div id="kpiInterestDetail" class="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              Os juros representam <strong class="text-emerald-600 dark:text-emerald-400">76,8%</strong> do patrimônio final
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. SNOWBALL EFFECT ALERT BANNER (Ponto de Virada) -->
+        <div id="snowballCard" class="rounded-2xl p-4 sm:p-5 border transition-all bg-gradient-to-r from-blue-500/10 via-emerald-500/10 to-teal-500/10 border-emerald-500/30 dark:border-emerald-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-start gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5 sm:mt-0">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white">
+                  Ponto de Virada — Efeito Bola de Neve
+                </h3>
+                <span id="snowballBadge" class="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-500 text-white">
+                  Mês 74 (Ano 7)
+                </span>
+              </div>
+              <p id="snowballDescription" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
+                A partir do <strong>Mês 74</strong> (6 anos e 2 meses), o rendimento mensal dos seus investimentos supera o valor do seu aporte mensal!
+              </p>
+            </div>
+          </div>
+          <div id="snowballMetricBox" class="w-full sm:w-auto shrink-0 px-3.5 py-2 rounded-xl bg-white/80 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 text-right">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Juros no Ponto de Virada</span>
+            <span id="snowballYieldValue" class="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400">R$ 1.512,40 /mês</span>
+          </div>
+        </div>
+
+        <!-- 3. INTERACTIVE CHART SECTION -->
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-lg shadow-slate-900/5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                Evolução Patrimonial no Tempo
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Compare o crescimento exponencial dos juros compostos frente aos aportes realizados
+              </p>
+            </div>
+
+            <!-- Chart Mode Switcher -->
+            <div class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 self-start sm:self-auto">
+              <button
+                type="button"
+                id="btnChartWealth"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm"
+              >
+                Curva de Patrimônio
+              </button>
+              <button
+                type="button"
+                id="btnChartMonthly"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              >
+                Juros Mensal vs Aporte
+              </button>
+            </div>
+          </div>
+
+          <div class="relative w-full h-72 sm:h-80">
+            <canvas id="evolutionChart"></canvas>
+          </div>
+        </div>
+
+        <!-- 4. DETAILED EVOLUTION TABLE -->
+        <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-lg shadow-slate-900/5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div>
+              <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                Tabela Detalhada de Evolução
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Acompanhamento período a período com destaque no Ponto de Virada (⚡)
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <!-- Toggle Visão por Ano / Visão por Mês -->
+              <div class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  id="btnTableYearly"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm"
+                >
+                  Visão por Ano
+                </button>
+                <button
+                  type="button"
+                  id="btnTableMonthly"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                >
+                  Visão por Mês
+                </button>
+              </div>
+
+              <!-- Export CSV -->
+              <button
+                type="button"
+                id="btnExportCSV"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
+              >
+                <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                <span>Exportar CSV</span>
+              </button>
+
+              <!-- Copy Summary -->
+              <button
+                type="button"
+                id="btnCopyTableSummary"
+                class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-colors"
+              >
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                <span>Copiar Resumo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Wrapper -->
+          <div class="overflow-x-auto max-h-96 rounded-xl border border-slate-200 dark:border-slate-800">
+            <table class="w-full text-left border-collapse">
+              <thead class="sticky top-0 z-10 bg-slate-100 dark:bg-slate-950 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                <tr>
+                  <th class="py-3 px-4">Período</th>
+                  <th class="py-3 px-4 text-right">Aporte no Período</th>
+                  <th class="py-3 px-4 text-right">Rendimento (Juros)</th>
+                  <th class="py-3 px-4 text-right">Total Investido</th>
+                  <th class="py-3 px-4 text-right">Juros Acumulados</th>
+                  <th class="py-3 px-4 text-right">Patrimônio Final</th>
+                </tr>
+              </thead>
+              <tbody id="evolutionTableBody" class="divide-y divide-slate-200/70 dark:divide-slate-800/70 text-xs sm:text-sm font-mono">
+                <!-- Populated dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 border-t border-slate-200/60 dark:border-slate-800/60 text-center text-xs text-slate-400 dark:text-slate-500">
+    Calculadora Pro de Juros Compostos & Renda Passiva • Equivalência Composta Exata <span class="font-mono">(1 + i_a)^(1/12) - 1</span> & Equação de Fisher
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    /*************************************************************************
+     * APPLICATION STATE & CONFIGURATION
+     *************************************************************************/
+    const state = {
+      initialValue: 10000,         // R$ 10.000,00
+      monthlyContribution: 1500,   // R$ 1.500,00
+      annualStepUp: 0,             // % de reajuste anual do aporte
+      rateValue: 12.0,             // 12%
+      ratePeriod: 'annual',        // 'annual' | 'monthly'
+      periodValue: 20,             // 20
+      periodUnit: 'years',         // 'years' | 'months'
+      discountInflation: false,    // Toggle de Inflação
+      inflationRate: 4.5,          // IPCA 4.5% a.a.
+      chartMode: 'wealth',         // 'wealth' | 'monthly'
+      tableView: 'yearly',         // 'yearly' | 'monthly'
+      monthlyData: [],             // Dados mês a mês gerados na simulação
+      yearlyData: [],              // Dados consolidados ano a ano
+      snowballMonth: null          // Mês em que juros mensais >= aporte mensal
+    };
+
+    // Formatters PT-BR
+    const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const numberFormatter = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const pctFormatter = new Intl.NumberFormat('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 4
+    });
+
+    /*************************************************************************
+     * CURRENCY MASK & PARSING UTILITIES
+     *************************************************************************/
+    function formatCentavosToInput(valueInReais) {
+      return numberFormatter.format(valueInReais);
+    }
+
+    function parseCurrencyInput(rawString) {
+      const digitsOnly = String(rawString).replace(/\D/g, '');
+      if (!digitsOnly) return 0;
+      return parseInt(digitsOnly, 10) / 100;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.textContent = message;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2800);
+    }
+
+    /*************************************************************************
+     * FINANCIAL ENGINE (COMPOUND EQUIVALENCE & FISHER FORMULA)
+     *************************************************************************/
+    function getEffectiveRates() {
+      const rawRate = Math.max(0, Number(state.rateValue) || 0) / 100;
+
+      // 1. Nominal Annual & Monthly Equivalent Rates: (1 + i_a)^(1/12) - 1
+      let nominalAnnual = 0;
+      let nominalMonthly = 0;
+
+      if (state.ratePeriod === 'annual') {
+        nominalAnnual = rawRate;
+        nominalMonthly = Math.pow(1 + nominalAnnual, 1 / 12) - 1;
+      } else {
+        nominalMonthly = rawRate;
+        nominalAnnual = Math.pow(1 + nominalMonthly, 12) - 1;
+      }
+
+      // 2. Fisher's Exact Real Interest Equation when inflation discount is ON:
+      // 1 + i_real = (1 + i_nominal) / (1 + inflation)
+      const inflationAnnual = Math.max(0, Number(state.inflationRate) || 0) / 100;
+      const realAnnual = (1 + nominalAnnual) / (1 + inflationAnnual) - 1;
+      const realMonthly = Math.pow(1 + realAnnual, 1 / 12) - 1;
+
+      const effectiveMonthly = state.discountInflation ? realMonthly : nominalMonthly;
+      const effectiveAnnual = state.discountInflation ? realAnnual : nominalAnnual;
+
+      return {
+        nominalAnnual,
+        nominalMonthly,
+        inflationAnnual,
+        realAnnual,
+        realMonthly,
+        effectiveMonthly,
+        effectiveAnnual
+      };
+    }
+
+    function runSimulation() {
+      const rates = getEffectiveRates();
+      const totalMonths = state.periodUnit === 'years'
+        ? Math.max(1, Math.round(state.periodValue * 12))
+        : Math.max(1, Math.round(state.periodValue));
+
+      const i_m = rates.effectiveMonthly;
+      const stepUpRate = Math.max(0, Number(state.annualStepUp) || 0) / 100;
+
+      let balance = state.initialValue;
+      let totalInvested = state.initialValue;
+      let totalInterest = 0;
+
+      const monthlyData = [];
+      const yearlyData = [];
+      let snowballMonthObj = null;
+
+      // Aggregates for yearly rows
+      let yearContributionSum = 0;
+      let yearInterestSum = 0;
+      let yearHasSnowball = false;
+
+      for (let m = 1; m <= totalMonths; m++) {
+        const yearIndex = Math.floor((m - 1) / 12);
+        const currentContribution = state.monthlyContribution * Math.pow(1 + stepUpRate, yearIndex);
+
+        // Interest generated on current accumulated balance during month m
+        const monthlyInterest = balance * i_m;
+
+        balance += monthlyInterest + currentContribution;
+        totalInvested += currentContribution;
+        totalInterest += monthlyInterest;
+
+        yearContributionSum += currentContribution;
+        yearInterestSum += monthlyInterest;
+
+        const isTurnPoint =
+          snowballMonthObj === null &&
+          monthlyInterest >= currentContribution &&
+          monthlyInterest > 0 &&
+          currentContribution > 0;
+
+        if (isTurnPoint) {
+          snowballMonthObj = {
+            month: m,
+            year: Math.ceil(m / 12),
+            monthlyInterest,
+            currentContribution,
+            balance
+          };
+          yearHasSnowball = true;
+        }
+
+        monthlyData.push({
+          month: m,
+          year: Math.ceil(m / 12),
+          periodContribution: currentContribution,
+          periodInterest: monthlyInterest,
+          totalInvested,
+          totalInterest,
+          balance,
+          isTurnPoint
+        });
+
+        // Consolidate at the end of each 12-month cycle or final month
+        if (m % 12 === 0 || m === totalMonths) {
+          yearlyData.push({
+            year: Math.ceil(m / 12),
+            monthsCount: m,
+            periodContribution: yearContributionSum,
+            periodInterest: yearInterestSum,
+            totalInvested,
+            totalInterest,
+            balance,
+            lastMonthInterest: monthlyInterest,
+            lastMonthContribution: currentContribution,
+            isTurnPoint: yearHasSnowball
+          });
+          yearContributionSum = 0;
+          yearInterestSum = 0;
+          yearHasSnowball = false;
+        }
+      }
+
+      // If snowball wasn't reached in the chosen period, project ahead up to 1200 months (100 years)
+      let projectedSnowballMonth = null;
+      if (!snowballMonthObj && i_m > 0 && state.monthlyContribution > 0) {
+        let projBalance = balance;
+        for (let m = totalMonths + 1; m <= 1200; m++) {
+          const yearIndex = Math.floor((m - 1) / 12);
+          const projContrib = state.monthlyContribution * Math.pow(1 + stepUpRate, yearIndex);
+          const projInterest = projBalance * i_m;
+          projBalance += projInterest + projContrib;
+          if (projInterest >= projContrib) {
+            projectedSnowballMonth = {
+              month: m,
+              year: Math.ceil(m / 12),
+              monthlyInterest: projInterest,
+              currentContribution: projContrib
+            };
+            break;
+          }
+        }
+      }
+
+      state.monthlyData = monthlyData;
+      state.yearlyData = yearlyData;
+      state.snowballMonth = snowballMonthObj;
+      state.projectedSnowballMonth = projectedSnowballMonth;
+
+      updateUI(rates, totalMonths);
+    }
+
+    /*************************************************************************
+     * UI UPDATER (CARDS, EQUIVALENT BADGES, SNOWBALL BANNER, CHART, TABLE)
+     *************************************************************************/
+    function updateUI(rates, totalMonths) {
+      // 1. Equivalent Rate Badge
+      const eqBadge = document.getElementById('equivalentRateBadge');
+      if (state.ratePeriod === 'annual') {
+        eqBadge.textContent = `≈ ${pctFormatter.format(rates.nominalMonthly * 100)}% a.m.`;
+      } else {
+        eqBadge.textContent = `≈ ${pctFormatter.format(rates.nominalAnnual * 100)}% a.a.`;
+      }
+
+      // 2. Period Conversion Label
+      const periodLabel = document.getElementById('periodConversionLabel');
+      if (state.periodUnit === 'years') {
+        periodLabel.textContent = `${totalMonths} ${totalMonths === 1 ? 'mês' : 'meses'}`;
+      } else {
+        const yrs = (totalMonths / 12).toFixed(1).replace('.0', '');
+        periodLabel.textContent = `≈ ${yrs.replace('.', ',')} ${Number(yrs) === 1 ? 'ano' : 'anos'}`;
+      }
+
+      // 3. Real Rate Display (Fisher)
+      const realRateEl = document.getElementById('realRateDisplay');
+      realRateEl.textContent = `${numberFormatter.format(rates.realAnnual * 100)}% a.a. (${pctFormatter.format(rates.realMonthly * 100)}% a.m.)`;
+
+      const badgeInflationMode = document.getElementById('badgeInflationMode');
+      if (state.discountInflation) {
+        badgeInflationMode.textContent = 'Poder de Compra Real';
+        badgeInflationMode.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30';
+      } else {
+        badgeInflationMode.textContent = 'Valor Nominal';
+        badgeInflationMode.className = 'px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300';
+      }
+
+      // 4. Final Metrics from Last Month
+      const finalRow = state.monthlyData[state.monthlyData.length - 1] || {
+        balance: state.initialValue,
+        totalInvested: state.initialValue,
+        totalInterest: 0
+      };
+
+      const finalWealth = finalRow.balance;
+      const totalInvested = finalRow.totalInvested;
+      const totalInterest = finalRow.totalInterest;
+
+      // Passive monthly income generated by final wealth without touching principal
+      const passiveMonthly = finalWealth * rates.effectiveMonthly;
+      const passiveAnnual = passiveMonthly * 12;
+
+      const investedPct = finalWealth > 0 ? Math.max(0, (totalInvested / finalWealth) * 100) : 100;
+      const interestPct = finalWealth > 0 ? Math.max(0, (totalInterest / finalWealth) * 100) : 0;
+      const multiplier = totalInvested > 0 ? finalWealth / totalInvested : 1;
+
+      document.getElementById('kpiTotalWealth').textContent = currencyFormatter.format(finalWealth);
+      document.getElementById('barInvested').style.width = `${investedPct.toFixed(1)}%`;
+      document.getElementById('barInterest').style.width = `${interestPct.toFixed(1)}%`;
+      document.getElementById('lblInvestedPct').textContent = `${numberFormatter.format(investedPct)}%`;
+      document.getElementById('lblInterestPct').textContent = `${numberFormatter.format(interestPct)}%`;
+
+      document.getElementById('kpiPassiveIncome').textContent = currencyFormatter.format(passiveMonthly);
+      document.getElementById('kpiPassiveAnnual').textContent = `${currencyFormatter.format(passiveAnnual)} /ano`;
+
+      const totalContributionsOnly = totalInvested - state.initialValue;
+      document.getElementById('kpiTotalInvested').textContent = currencyFormatter.format(totalInvested);
+      document.getElementById('kpiInvestedBreakdown').textContent =
+        `Inicial: ${currencyFormatter.format(state.initialValue)} + Aportes: ${currencyFormatter.format(totalContributionsOnly)}`;
+
+      document.getElementById('kpiTotalInterest').textContent = `${totalInterest >= 0 ? '+' : ''} ${currencyFormatter.format(totalInterest)}`;
+      document.getElementById('badgeMultiplier').textContent = `${numberFormatter.format(multiplier)}x o capital`;
+      document.getElementById('kpiInterestDetail').innerHTML =
+        `Os juros representam <strong class="text-emerald-600 dark:text-emerald-400">${numberFormatter.format(interestPct)}%</strong> do patrimônio final`;
+
+      // 5. Snowball Alert Card
+      updateSnowballBanner();
+
+      // 6. Update Chart & Table
+      updateChart();
+      renderTable();
+    }
+
+    function updateSnowballBanner() {
+      const badge = document.getElementById('snowballBadge');
+      const desc = document.getElementById('snowballDescription');
+      const yieldVal = document.getElementById('snowballYieldValue');
+      const metricBox = document.getElementById('snowballMetricBox');
+
+      if (state.monthlyContribution === 0 && state.initialValue > 0) {
+        badge.textContent = 'Desde o Mês 1';
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-500 text-white';
+        desc.innerHTML = 'Como você não configurou aportes mensais, <strong>100% do crescimento</strong> já vem exclusivamente do rendimento do seu capital inicial desde o 1º mês.';
+        const firstMonthInterest = state.monthlyData[0]?.periodInterest || 0;
+        yieldVal.textContent = `${currencyFormatter.format(firstMonthInterest)} /mês`;
+        metricBox.classList.remove('hidden');
+        return;
+      }
+
+      if (state.snowballMonth) {
+        const m = state.snowballMonth.month;
+        const years = Math.floor(m / 12);
+        const remMonths = m % 12;
+        let timeStr = '';
+        if (years > 0 && remMonths > 0) {
+          timeStr = `${years} ${years === 1 ? 'ano' : 'anos'} e ${remMonths} ${remMonths === 1 ? 'mês' : 'meses'}`;
+        } else if (years > 0) {
+          timeStr = `${years} ${years === 1 ? 'ano' : 'anos'}`;
+        } else {
+          timeStr = `${m} ${m === 1 ? 'mês' : 'meses'}`;
+        }
+
+        badge.textContent = `Mês ${m} (Ano ${state.snowballMonth.year})`;
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-emerald-500 text-white';
+        desc.innerHTML = `A partir do <strong>Mês ${m}</strong> (${timeStr}), o rendimento mensal dos juros (<strong>${currencyFormatter.format(state.snowballMonth.monthlyInterest)}</strong>) passa a superar o seu aporte mensal de <strong>${currencyFormatter.format(state.snowballMonth.currentContribution)}</strong>!`;
+        yieldVal.textContent = `${currencyFormatter.format(state.snowballMonth.monthlyInterest)} /mês`;
+        metricBox.classList.remove('hidden');
+      } else if (state.projectedSnowballMonth) {
+        const pm = state.projectedSnowballMonth.month;
+        badge.textContent = `Previsto p/ Mês ${pm} (Ano ${state.projectedSnowballMonth.year})`;
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-amber-500 text-white';
+        desc.innerHTML = `O ponto de virada ainda não ocorre dentro do período escolhido, mas mantendo essa estratégia ele será atingido no <strong>Mês ${pm} (Ano ${state.projectedSnowballMonth.year})</strong>.`;
+        yieldVal.textContent = `${currencyFormatter.format(state.projectedSnowballMonth.monthlyInterest)} /mês`;
+        metricBox.classList.remove('hidden');
+      } else {
+        badge.textContent = 'Não atingido';
+        badge.className = 'px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-slate-500 text-white';
+        desc.innerHTML = 'Com a taxa de juros real ou parâmetros atuais, o rendimento mensal não supera o aporte. Experimente aumentar o prazo ou a taxa de rentabilidade.';
+        metricBox.classList.add('hidden');
+      }
+    }
+
+    /*************************************************************************
+     * CHART.JS INITIALIZATION & UPDATES
+     *************************************************************************/
+    let chartInstance = null;
+
+    function updateChart() {
+      const ctx = document.getElementById('evolutionChart').getContext('2d');
+      const isDark = document.documentElement.classList.contains('dark');
+
+      // Use yearly data if total months > 36 for cleaner visualization, else monthly
+      const useYearlyPoints = state.monthlyData.length > 36;
+      const sourceData = useYearlyPoints ? state.yearlyData : state.monthlyData;
+
+      const labels = sourceData.map(item =>
+        useYearlyPoints ? `Ano ${item.year}` : `Mês ${item.month}`
+      );
+
+      let datasets = [];
+
+      if (state.chartMode === 'wealth') {
+        datasets = [
+          {
+            label: 'Patrimônio Total',
+            data: sourceData.map(d => d.balance),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.14)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointRadius: sourceData.length > 30 ? 0 : 3,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'Juros Acumulados',
+            data: sourceData.map(d => d.totalInterest),
+            borderColor: '#14b8a6',
+            backgroundColor: 'transparent',
+            borderDash: [5, 5],
+            borderWidth: 2,
+            fill: false,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 5
+          },
+          {
+            label: 'Capital Investido',
+            data: sourceData.map(d => d.totalInvested),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.10)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.2,
+            pointRadius: sourceData.length > 30 ? 0 : 2,
+            pointHoverRadius: 5
+          }
+        ];
+      } else {
+        // Monthly Passive Yield vs Monthly Contribution Curve (Snowball Crossover)
+        datasets = [
+          {
+            label: 'Rendimento Mensal (Juros)',
+            data: sourceData.map(d => useYearlyPoints ? d.lastMonthInterest : d.periodInterest),
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.18)',
+            borderWidth: 2.5,
+            fill: true,
+            tension: 0.35,
+            pointRadius: sourceData.length > 30 ? 0 : 3,
+            pointHoverRadius: 6
+          },
+          {
+            label: 'Aporte Mensal',
+            data: sourceData.map(d => useYearlyPoints ? d.lastMonthContribution : d.periodContribution),
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.08)',
+            borderWidth: 2,
+            borderDash: [6, 4],
+            fill: false,
+            tension: 0.2,
+            pointRadius: 0,
+            pointHoverRadius: 5
+          }
+        ];
+      }
+
+      const textColor = isDark ? '#94a3b8' : '#64748b';
+      const gridColor = isDark ? 'rgba(51, 65, 85, 0.35)' : 'rgba(226, 232, 240, 0.8)';
+
+      if (chartInstance) {
+        chartInstance.data.labels = labels;
+        chartInstance.data.datasets = datasets;
+        chartInstance.options.scales.x.ticks.color = textColor;
+        chartInstance.options.scales.y.ticks.color = textColor;
+        chartInstance.options.scales.x.grid.color = gridColor;
+        chartInstance.options.scales.y.grid.color = gridColor;
+        chartInstance.options.plugins.legend.labels.color = isDark ? '#e2e8f0' : '#334155';
+        chartInstance.update('none');
+        return;
+      }
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              align: 'end',
+              labels: {
+                color: isDark ? '#e2e8f0' : '#334155',
+                usePointStyle: true,
+                pointStyle: 'circle',
+                padding: 16,
+                font: { family: 'Inter', size: 12, weight: '600' }
+              }
+            },
+            tooltip: {
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+              titleColor: isDark ? '#f8fafc' : '#0f172a',
+              bodyColor: isDark ? '#cbd5e1' : '#334155',
+              borderColor: isDark ? '#334155' : '#e2e8f0',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              usePointStyle: true,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.dataset.label}: ${currencyFormatter.format(context.parsed.y)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: textColor,
+                maxTicksLimit: 10,
+                font: { family: 'JetBrains Mono', size: 11 }
+              },
+              grid: {
+                color: gridColor,
+                drawBorder: false
+              }
+            },
+            y: {
+              ticks: {
+                color: textColor,
+                font: { family: 'JetBrains Mono', size: 11 },
+                callback: function(value) {
+                  if (Math.abs(value) >= 1000000) {
+                    return 'R$ ' + (value / 1000000).toFixed(1).replace('.', ',') + 'M';
+                  }
+                  if (Math.abs(value) >= 1000) {
+                    return 'R$ ' + (value / 1000).toFixed(0) + 'k';
+                  }
+                  return 'R$ ' + value;
+                }
+              },
+              grid: {
+                color: gridColor,
+                drawBorder: false
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /*************************************************************************
+     * TABLE RENDERING & EXPORT (CSV / CLIPBOARD)
+     *************************************************************************/
+    function renderTable() {
+      const tbody = document.getElementById('evolutionTableBody');
+      const rows = state.tableView === 'yearly' ? state.yearlyData : state.monthlyData;
+
+      const htmlRows = rows.map(row => {
+        const periodLabel = state.tableView === 'yearly'
+          ? `Ano ${row.year}`
+          : `Mês ${row.month} (A${row.year})`;
+
+        const highlightClass = row.isTurnPoint
+          ? 'bg-emerald-500/10 dark:bg-emerald-500/15 font-semibold'
+          : 'hover:bg-slate-50 dark:hover:bg-slate-800/50';
+
+        const badgeTurnPoint = row.isTurnPoint
+          ? `<span class="ml-1.5 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-sans font-bold bg-emerald-500 text-white" title="Ponto de Virada: Rendimento supera Aporte!">⚡ Virada</span>`
+          : '';
+
+        return `
+          <tr class="${highlightClass} transition-colors">
+            <td class="py-3 px-4 whitespace-nowrap text-slate-800 dark:text-slate-200">
+              ${periodLabel} ${badgeTurnPoint}
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap text-slate-600 dark:text-slate-300">
+              ${currencyFormatter.format(row.periodContribution)}
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap text-emerald-600 dark:text-emerald-400">
+              + ${currencyFormatter.format(row.periodInterest)}
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap text-blue-600 dark:text-blue-400">
+              ${currencyFormatter.format(row.totalInvested)}
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap text-emerald-600 dark:text-emerald-400">
+              ${currencyFormatter.format(row.totalInterest)}
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap font-bold text-slate-900 dark:text-white">
+              ${currencyFormatter.format(row.balance)}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tbody.innerHTML = htmlRows;
+    }
+
+    function exportToCSV() {
+      const rows = state.tableView === 'yearly' ? state.yearlyData : state.monthlyData;
+      const headers = [
+        'Periodo',
+        'Aporte no Periodo (R$)',
+        'Rendimento Juros (R$)',
+        'Total Investido (R$)',
+        'Juros Acumulados (R$)',
+        'Patrimonio Final (R$)'
+      ];
+
+      const csvLines = [headers.join(';')];
+
+      rows.forEach(row => {
+        const periodLabel = state.tableView === 'yearly' ? `Ano ${row.year}` : `Mes ${row.month}`;
+        csvLines.push([
+          periodLabel,
+          row.periodContribution.toFixed(2).replace('.', ','),
+          row.periodInterest.toFixed(2).replace('.', ','),
+          row.totalInvested.toFixed(2).replace('.', ','),
+          row.totalInterest.toFixed(2).replace('.', ','),
+          row.balance.toFixed(2).replace('.', ',')
+        ].join(';'));
+      });
+
+      const csvContent = '\uFEFF' + csvLines.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `simulacao-juros-compostos-${state.tableView}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      showToast('Planilha CSV exportada com sucesso!');
+    }
+
+    function copyExecutiveSummary() {
+      const rates = getEffectiveRates();
+      const finalRow = state.monthlyData[state.monthlyData.length - 1];
+      if (!finalRow) return;
+
+      const passiveMonthly = finalRow.balance * rates.effectiveMonthly;
+      const periodText = state.periodUnit === 'years'
+        ? `${state.periodValue} anos (${state.monthlyData.length} meses)`
+        : `${state.periodValue} meses`;
+
+      const rateText = state.ratePeriod === 'annual'
+        ? `${numberFormatter.format(state.rateValue)}% a.a. (${pctFormatter.format(rates.nominalMonthly * 100)}% a.m.)`
+        : `${numberFormatter.format(state.rateValue)}% a.m. (${pctFormatter.format(rates.nominalAnnual * 100)}% a.a.)`;
+
+      const summaryLines = [
+        '📊 RESUMO DA SIMULAÇÃO — JUROS COMPOSTOS & RENDA PASSIVA',
+        '--------------------------------------------------------',
+        `• Valor Inicial: ${currencyFormatter.format(state.initialValue)}`,
+        `• Aporte Mensal Inicial: ${currencyFormatter.format(state.monthlyContribution)}${state.annualStepUp > 0 ? ` (Reajuste de +${state.annualStepUp}% a.a.)` : ''}`,
+        `• Taxa de Juros: ${rateText}`,
+        `• Período: ${periodText}`,
+        state.discountInflation ? `• Inflação Descontada (IPCA): ${numberFormatter.format(state.inflationRate)}% a.a. (Taxa Real: ${numberFormatter.format(rates.realAnnual * 100)}% a.a.)` : '• Modalidade: Valor Nominal',
+        '--------------------------------------------------------',
+        `💰 Patrimônio Final Acumulado: ${currencyFormatter.format(finalRow.balance)}`,
+        `🏦 Total Investido (Capital Próprio): ${currencyFormatter.format(finalRow.totalInvested)}`,
+        `📈 Total Ganho em Juros: ${currencyFormatter.format(finalRow.totalInterest)}`,
+        `🌴 Renda Passiva Mensal Estimada: ${currencyFormatter.format(passiveMonthly)} /mês`,
+        state.snowballMonth ? `⚡ Ponto de Virada (Bola de Neve): Mês ${state.snowballMonth.month} (Ano ${state.snowballMonth.year})` : ''
+      ].filter(Boolean).join('\n');
+
+      const textarea = document.createElement('textarea');
+      textarea.value = summaryLines;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showToast('Resumo copiado para a área de transferência!');
+      } catch (err) {
+        showToast('Não foi possível copiar automaticamente.');
+      }
+      document.body.removeChild(textarea);
+    }
+
+    /*************************************************************************
+     * EVENT LISTENERS & INTERACTIVE CONTROLS
+     *************************************************************************/
+    function setupEventListeners() {
+      const inputInitial = document.getElementById('inputInitial');
+      const inputMonthly = document.getElementById('inputMonthly');
+      const sliderMonthly = document.getElementById('sliderMonthly');
+      const inputStepUp = document.getElementById('inputStepUp');
+      const inputRate = document.getElementById('inputRate');
+      const inputPeriod = document.getElementById('inputPeriod');
+      const sliderPeriod = document.getElementById('sliderPeriod');
+      const inputInflation = document.getElementById('inputInflation');
+
+      // 1. Initial Value Input (Live Currency Mask)
+      inputInitial.addEventListener('input', (e) => {
+        const val = parseCurrencyInput(e.target.value);
+        state.initialValue = val;
+        e.target.value = formatCentavosToInput(val);
+        runSimulation();
+      });
+
+      // Quick Add Initial Value Buttons
+      document.querySelectorAll('[data-add-initial]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const addAmount = Number(btn.getAttribute('data-add-initial'));
+          state.initialValue += addAmount;
+          inputInitial.value = formatCentavosToInput(state.initialValue);
+          runSimulation();
+        });
+      });
+
+      document.querySelector('[data-action="clear-initial"]').addEventListener('click', () => {
+        state.initialValue = 0;
+        inputInitial.value = formatCentavosToInput(0);
+        runSimulation();
+      });
+
+      // 2. Monthly Contribution Input & Slider
+      inputMonthly.addEventListener('input', (e) => {
+        const val = parseCurrencyInput(e.target.value);
+        state.monthlyContribution = val;
+        e.target.value = formatCentavosToInput(val);
+        sliderMonthly.value = Math.min(25000, val);
+        runSimulation();
+      });
+
+      sliderMonthly.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        state.monthlyContribution = val;
+        inputMonthly.value = formatCentavosToInput(val);
+        runSimulation();
+      });
+
+      document.querySelectorAll('[data-add-monthly]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const addAmount = Number(btn.getAttribute('data-add-monthly'));
+          state.monthlyContribution += addAmount;
+          inputMonthly.value = formatCentavosToInput(state.monthlyContribution);
+          sliderMonthly.value = Math.min(25000, state.monthlyContribution);
+          runSimulation();
+        });
+      });
+
+      // Step-up Annual Adjustment
+      inputStepUp.addEventListener('input', (e) => {
+        state.annualStepUp = Math.max(0, Number(e.target.value) || 0);
+        runSimulation();
+      });
+
+      // 3. Interest Rate & Selector (% a.a. vs % a.m.)
+      inputRate.addEventListener('input', (e) => {
+        state.rateValue = Math.max(0, Number(e.target.value) || 0);
+        highlightActivePreset();
+        runSimulation();
+      });
+
+      const btnRateAnnual = document.getElementById('btnRateAnnual');
+      const btnRateMonthly = document.getElementById('btnRateMonthly');
+
+      btnRateAnnual.addEventListener('click', () => {
+        if (state.ratePeriod === 'annual') return;
+        // Convert current monthly rate to equivalent annual rate
+        const monthlyDec = (Number(state.rateValue) || 0) / 100;
+        const annualEq = (Math.pow(1 + monthlyDec, 12) - 1) * 100;
+        state.ratePeriod = 'annual';
+        state.rateValue = Number(annualEq.toFixed(2));
+        inputRate.value = state.rateValue;
+
+        btnRateAnnual.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnRateMonthly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        highlightActivePreset();
+        runSimulation();
+      });
+
+      btnRateMonthly.addEventListener('click', () => {
+        if (state.ratePeriod === 'monthly') return;
+        // Convert current annual rate to exact compound monthly rate
+        const annualDec = (Number(state.rateValue) || 0) / 100;
+        const monthlyEq = (Math.pow(1 + annualDec, 1 / 12) - 1) * 100;
+        state.ratePeriod = 'monthly';
+        state.rateValue = Number(monthlyEq.toFixed(4));
+        inputRate.value = state.rateValue;
+
+        btnRateMonthly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnRateAnnual.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        highlightActivePreset();
+        runSimulation();
+      });
+
+      // Rate Presets
+      document.querySelectorAll('.preset-rate-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const presetAnnual = Number(btn.getAttribute('data-preset-rate'));
+          if (state.ratePeriod === 'annual') {
+            state.rateValue = presetAnnual;
+          } else {
+            const monthlyEq = (Math.pow(1 + presetAnnual / 100, 1 / 12) - 1) * 100;
+            state.rateValue = Number(monthlyEq.toFixed(4));
+          }
+          inputRate.value = state.rateValue;
+          highlightActivePreset(presetAnnual);
+          runSimulation();
+        });
+      });
+
+      // 4. Period Input, Unit Selector & Synchronized Slider
+      const btnPeriodYears = document.getElementById('btnPeriodYears');
+      const btnPeriodMonths = document.getElementById('btnPeriodMonths');
+
+      inputPeriod.addEventListener('input', (e) => {
+        const val = Math.max(1, parseInt(e.target.value, 10) || 1);
+        state.periodValue = val;
+        sliderPeriod.value = Math.min(Number(sliderPeriod.max), val);
+        runSimulation();
+      });
+
+      sliderPeriod.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        state.periodValue = val;
+        inputPeriod.value = val;
+        runSimulation();
+      });
+
+      btnPeriodYears.addEventListener('click', () => {
+        if (state.periodUnit === 'years') return;
+        state.periodUnit = 'years';
+        state.periodValue = Math.max(1, Math.round(state.periodValue / 12));
+        sliderPeriod.min = 1;
+        sliderPeriod.max = 50;
+        sliderPeriod.value = Math.min(50, state.periodValue);
+        inputPeriod.value = state.periodValue;
+
+        document.getElementById('sliderMinLabel').textContent = '1 ano';
+        document.getElementById('sliderMidLabel').textContent = '25 anos';
+        document.getElementById('sliderMaxLabel').textContent = '50 anos';
+
+        btnPeriodYears.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnPeriodMonths.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        runSimulation();
+      });
+
+      btnPeriodMonths.addEventListener('click', () => {
+        if (state.periodUnit === 'months') return;
+        state.periodUnit = 'months';
+        state.periodValue = Math.max(1, Math.round(state.periodValue * 12));
+        sliderPeriod.min = 1;
+        sliderPeriod.max = 600;
+        sliderPeriod.value = Math.min(600, state.periodValue);
+        inputPeriod.value = state.periodValue;
+
+        document.getElementById('sliderMinLabel').textContent = '1 mês';
+        document.getElementById('sliderMidLabel').textContent = '300 meses';
+        document.getElementById('sliderMaxLabel').textContent = '600 meses';
+
+        btnPeriodMonths.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnPeriodYears.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        runSimulation();
+      });
+
+      // 5. Inflation Toggle & Input
+      const btnInflationToggle = document.getElementById('btnInflationToggle');
+      const inflationToggleKnob = document.getElementById('inflationToggleKnob');
+      const inflationDetails = document.getElementById('inflationDetails');
+
+      btnInflationToggle.addEventListener('click', () => {
+        state.discountInflation = !state.discountInflation;
+        btnInflationToggle.setAttribute('aria-checked', String(state.discountInflation));
+        if (state.discountInflation) {
+          btnInflationToggle.classList.remove('bg-slate-300', 'dark:bg-slate-700');
+          btnInflationToggle.classList.add('bg-emerald-600');
+          inflationToggleKnob.classList.remove('translate-x-0');
+          inflationToggleKnob.classList.add('translate-x-5');
+          inflationDetails.classList.remove('hidden');
+        } else {
+          btnInflationToggle.classList.add('bg-slate-300', 'dark:bg-slate-700');
+          btnInflationToggle.classList.remove('bg-emerald-600');
+          inflationToggleKnob.classList.add('translate-x-0');
+          inflationToggleKnob.classList.remove('translate-x-5');
+          inflationDetails.classList.add('hidden');
+        }
+        runSimulation();
+      });
+
+      inputInflation.addEventListener('input', (e) => {
+        state.inflationRate = Math.max(0, Number(e.target.value) || 0);
+        runSimulation();
+      });
+
+      // 6. Chart Mode Switcher
+      const btnChartWealth = document.getElementById('btnChartWealth');
+      const btnChartMonthly = document.getElementById('btnChartMonthly');
+
+      btnChartWealth.addEventListener('click', () => {
+        state.chartMode = 'wealth';
+        btnChartWealth.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnChartMonthly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        updateChart();
+      });
+
+      btnChartMonthly.addEventListener('click', () => {
+        state.chartMode = 'monthly';
+        btnChartMonthly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnChartWealth.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        updateChart();
+      });
+
+      // 7. Table View Switcher (Yearly vs Monthly)
+      const btnTableYearly = document.getElementById('btnTableYearly');
+      const btnTableMonthly = document.getElementById('btnTableMonthly');
+
+      btnTableYearly.addEventListener('click', () => {
+        state.tableView = 'yearly';
+        btnTableYearly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnTableMonthly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        renderTable();
+      });
+
+      btnTableMonthly.addEventListener('click', () => {
+        state.tableView = 'monthly';
+        btnTableMonthly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-emerald-600 text-white shadow-sm';
+        btnTableYearly.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+        renderTable();
+      });
+
+      // 8. Export CSV & Copy Summary Buttons
+      document.getElementById('btnExportCSV').addEventListener('click', exportToCSV);
+      document.getElementById('btnCopyHeader').addEventListener('click', copyExecutiveSummary);
+      document.getElementById('btnCopyTableSummary').addEventListener('click', copyExecutiveSummary);
+
+      // 9. Reset Button
+      document.getElementById('btnReset').addEventListener('click', () => {
+        state.initialValue = 10000;
+        state.monthlyContribution = 1500;
+        state.annualStepUp = 0;
+        state.rateValue = 12.0;
+        state.ratePeriod = 'annual';
+        state.periodValue = 20;
+        state.periodUnit = 'years';
+
+        inputInitial.value = formatCentavosToInput(state.initialValue);
+        inputMonthly.value = formatCentavosToInput(state.monthlyContribution);
+        sliderMonthly.value = state.monthlyContribution;
+        inputStepUp.value = 0;
+        inputRate.value = 12.0;
+        inputPeriod.value = 20;
+        sliderPeriod.min = 1;
+        sliderPeriod.max = 50;
+        sliderPeriod.value = 20;
+
+        btnRateAnnual.click();
+        btnPeriodYears.click();
+        highlightActivePreset(12);
+        runSimulation();
+        showToast('Parâmetros restaurados para o padrão!');
+      });
+
+      // 10. Theme Toggle (Dark / Light)
+      document.getElementById('btnTheme').addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        updateChart();
+      });
+    }
+
+    function highlightActivePreset(forcedAnnualRate = null) {
+      const rates = getEffectiveRates();
+      const currentAnnualPct = forcedAnnualRate !== null
+        ? forcedAnnualRate
+        : Math.round(rates.nominalAnnual * 100 * 100) / 100;
+
+      document.querySelectorAll('.preset-rate-btn').forEach(btn => {
+        const presetVal = Number(btn.getAttribute('data-preset-rate'));
+        if (Math.abs(currentAnnualPct - presetVal) < 0.05) {
+          btn.className = 'preset-rate-btn flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition-all';
+        } else {
+          btn.className = 'preset-rate-btn flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs bg-slate-100 hover:bg-emerald-500/10 dark:bg-slate-800/70 dark:hover:bg-emerald-500/20 text-slate-700 dark:text-slate-300 border border-transparent hover:border-emerald-500/30 transition-all';
+        }
+      });
+    }
+
+    // Initialize Application on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      runSimulation();
+    });
+  </script>
+</body>
+</html>
